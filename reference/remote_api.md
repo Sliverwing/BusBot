@@ -6,3 +6,9 @@
 ```
 GET http://60.210.101.86:8980/server-ue2/rest/buslines/simple/370300/{key_words}
 ```
+## Line Index
+
+## Line Detail
+```
+GET http://60.210.101.86:8980/server-ue2/rest/buslines/370300/{id}
+```
