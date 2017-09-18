@@ -11,7 +11,7 @@ type LineSearchHttpResponse struct {
 }
 
 type LineResult struct {
-	ID               string    `json:"string"`
+	ID               string    `json:"id"`
 	Area             int       `json:"area"`
 	LineName         string    `json:"lineName"`
 	StartStationName string    `json:"startStationName"`
