@@ -5,6 +5,11 @@ type LineHttpResponce struct {
 	Result LineResult `json:"result"`
 }
 
+type LineSearchHttpResponse struct {
+	Status Status       `json:"status"`
+	Result []LineResult `json:"result"`
+}
+
 type LineResult struct {
 	ID               string    `json:"string"`
 	Area             int       `json:"area"`
