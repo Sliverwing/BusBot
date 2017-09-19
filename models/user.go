@@ -3,9 +3,10 @@ package models
 var User *UserStatus
 
 type UserStatus struct {
-	ID          int
-	Action      string
-	CurrentPage int
+	ID           int
+	Action       string
+	CurrentPage  int
+	selectedLine int
 }
 
 func (u UserStatus) SetAction(action string) {
@@ -19,4 +20,12 @@ func (u UserStatus) SetCurrentPage(page int) {
 func (u UserStatus) Clear() {
 	u.Action = ""
 	u.CurrentPage = 0
+}
+
+func (u UserStatus) SelectLine(id int) {
+	u.selectedLine = id
+}
+
+func (u UserStatus) SelectedLine() int {
+	return u.selectedLine
 }

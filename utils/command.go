@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/sliverwing/BusBot/models"
@@ -31,6 +32,19 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 			respText += fmt.Sprintf("/selectline %s %s %s -- %s\n", ele.ID, ele.LineName, ele.StartStationName, ele.EndStationName)
 		}
 		msg := tgbotapi.NewMessage(message.Chat.ID, respText)
+		return &msg
+	case "selectline":
+		models.User.SetAction("selectline")
+		line := message.CommandArguments()
+		lineID, err := strconv.Atoi(line)
+		var text string
+		if err != nil {
+			text = "🌝 Param error, Integer is required!"
+		} else {
+			models.User.SelectLine(lineID)
+			text = "🎉 Selected!"
+		}
+		msg := tgbotapi.NewMessage(message.Chat.ID, text)
 		return &msg
 	default:
 		msg := tgbotapi.NewMessage(message.Chat.ID, "Default")
