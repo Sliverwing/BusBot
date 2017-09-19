@@ -71,6 +71,50 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 
 		msg := tgbotapi.NewMessage(message.Chat.ID, text)
 		return &msg
+	case "buses":
+		//
+		line := message.CommandArguments()
+		stations := map[int]string{}
+		var text string
+		lineID, err := strconv.Atoi(line)
+		if err != nil {
+			lineID = models.User.SelectedLine()
+		} else {
+			models.User.SelectLine(lineID)
+		}
+		res, err := DailLineDetail(lineID)
+		if err != nil || res.Status.Code != 0 {
+			if err != nil {
+				text = fmt.Sprintf("🌝 %v", err)
+			} else {
+				text = res.Status.Msg
+			}
+			msg := tgbotapi.NewMessage(message.Chat.ID, text)
+			return &msg
+		}
+		for _, ele := range res.Result.Stations {
+			id, _ := strconv.Atoi(ele.ID)
+			stations[id] = ele.StationName
+		}
+
+		busResp, err := DailBusDetail(lineID)
+		//
+		if err != nil || busResp.Status.Code != 0 {
+			if err != nil {
+				text = fmt.Sprintf("🌝 %v", err)
+			} else {
+				text = busResp.Status.Msg
+			}
+			msg := tgbotapi.NewMessage(message.Chat.ID, text)
+			return &msg
+		}
+		//
+		for _, ele := range busResp.Result {
+			text += fmt.Sprintf("🚍 %s %s\n", ele.BusID, stations[ele.StationSeqNum])
+		}
+		msg := tgbotapi.NewMessage(message.Chat.ID, text)
+		return &msg
+
 	default:
 		msg := tgbotapi.NewMessage(message.Chat.ID, "Default")
 		return &msg
