@@ -12,6 +12,9 @@ func main() {
 
 	models.User = &models.UserStatus{}
 
+	models.CachedLine = &models.CachedLineStruct{}
+	models.CachedLine.Init()
+
 	bot, err := tgbotapi.NewBotAPI("431548070:AAGEgvuPzkqJC-SlV96rUPGpWR4fTtd7XB0")
 	if err != nil {
 		log.Panicln(err)
