@@ -74,7 +74,7 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 	case "buses":
 		//
 		line := message.CommandArguments()
-		stations := map[int]string{}
+		stations := map[int]models.Station{}
 		var text string
 		lineID, err := strconv.Atoi(line)
 		if err != nil {
@@ -82,19 +82,23 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 		} else {
 			models.User.SelectLine(lineID)
 		}
-		res, err := DailLineDetail(lineID)
-		if err != nil || res.Status.Code != 0 {
-			if err != nil {
-				text = fmt.Sprintf("🌝 %v", err)
-			} else {
-				text = res.Status.Msg
+
+		if !models.CachedLine.IsExists(lineID) {
+			res, err := DailLineDetail(lineID)
+			if err != nil || res.Status.Code != 0 {
+				if err != nil {
+					text = fmt.Sprintf("🌝 %v", err)
+				} else {
+					text = res.Status.Msg
+				}
+				msg := tgbotapi.NewMessage(message.Chat.ID, text)
+				return &msg
 			}
-			msg := tgbotapi.NewMessage(message.Chat.ID, text)
-			return &msg
-		}
-		for _, ele := range res.Result.Stations {
-			id, _ := strconv.Atoi(ele.ID)
-			stations[id] = ele.StationName
+			for _, ele := range res.Result.Stations {
+				id, _ := strconv.Atoi(ele.ID)
+				stations[id] = ele
+			}
+			models.CachedLine.Push(lineID, &stations)
 		}
 
 		busResp, err := DailBusDetail(lineID)
@@ -109,8 +113,9 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 			return &msg
 		}
 		//
+		cachedStations, _ := models.CachedLine.Get(lineID)
 		for _, ele := range busResp.Result {
-			text += fmt.Sprintf("🚍 %s %s\n", ele.BusID, stations[ele.StationSeqNum])
+			text += fmt.Sprintf("🚍 %s %s\n", ele.BusID, (*cachedStations)[ele.StationSeqNum].StationName)
 		}
 		msg := tgbotapi.NewMessage(message.Chat.ID, text)
 		return &msg
