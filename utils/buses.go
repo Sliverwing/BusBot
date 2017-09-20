@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/levigross/grequests"
@@ -16,5 +17,16 @@ func DailBusDetail(lineID int) (*models.BusesHttpResponce, error) {
 		return nil, err
 	}
 	resp.JSON(&bus)
+	return bus, nil
+}
+
+func BusDetail(lineID int) (*models.BusesHttpResponce, error) {
+	bus, err := DailBusDetail(lineID)
+	if err != nil {
+		return nil, err
+	}
+	if bus.Status.Code != 0 {
+		return nil, errors.New(bus.Status.Msg)
+	}
 	return bus, nil
 }

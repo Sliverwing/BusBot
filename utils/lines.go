@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/levigross/grequests"
@@ -26,4 +27,26 @@ func DailSearchLine(param string) (*models.LineSearchHttpResponse, error) {
 	}
 	resp.JSON(&line)
 	return line, nil
+}
+
+func LineDetail(id int) (*models.LineHttpResponce, error) {
+	res, err := DailLineDetail(id)
+	if err != nil {
+		return nil, err
+	}
+	if res.Status.Code != 0 {
+		return nil, errors.New(res.Status.Msg)
+	}
+	return res, nil
+}
+
+func SearchLine(param string) (*models.LineSearchHttpResponse, error) {
+	res, err := DailSearchLine(param)
+	if err != nil {
+		return nil, err
+	}
+	if res.Status.Code != 0 {
+		return nil, errors.New(res.Status.Msg)
+	}
+	return res, nil
 }
