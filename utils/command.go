@@ -22,10 +22,6 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 			msg := tgbotapi.NewMessage(message.Chat.ID, fmt.Sprint(err))
 			return &msg
 		}
-		if res.Status.Code != 0 {
-			msg := tgbotapi.NewMessage(message.Chat.ID, res.Status.Msg)
-			return &msg
-		}
 		var respText string
 
 		for _, ele := range res.Result {
@@ -55,17 +51,13 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 		} else {
 			models.User.SelectLine(lineID)
 		}
-		res, err := DailLineDetail(lineID)
+		res, err := LineDetail(lineID)
 		if err != nil {
 			text = fmt.Sprintf("🌝 %v", err)
 		} else {
-			if res.Status.Code != 0 {
-				text = fmt.Sprintf("🌝 %s", res.Status.Msg)
-			} else {
-				text += fmt.Sprintf("🚍 %s\n %s -- %s\n", res.Result.LineName, res.Result.StartStationName, res.Result.EndStationName)
-				for _, ele := range res.Result.Stations {
-					text += fmt.Sprintf("📍 id: %s %s\n", ele.ID, ele.StationName)
-				}
+			text += fmt.Sprintf("🚍 %s\n %s -- %s\n", res.Result.LineName, res.Result.StartStationName, res.Result.EndStationName)
+			for _, ele := range res.Result.Stations {
+				text += fmt.Sprintf("📍 id: %s %s\n", ele.ID, ele.StationName)
 			}
 		}
 
@@ -84,13 +76,9 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 		}
 
 		if !models.CachedLine.IsExists(lineID) {
-			res, err := DailLineDetail(lineID)
-			if err != nil || res.Status.Code != 0 {
-				if err != nil {
-					text = fmt.Sprintf("🌝 %v", err)
-				} else {
-					text = res.Status.Msg
-				}
+			res, err := LineDetail(lineID)
+			if err != nil {
+				text = fmt.Sprintf("🌝 %v", err)
 				msg := tgbotapi.NewMessage(message.Chat.ID, text)
 				return &msg
 			}
@@ -101,7 +89,7 @@ func CommandHandler(message *tgbotapi.Message) *tgbotapi.MessageConfig {
 			models.CachedLine.Push(lineID, &stations)
 		}
 
-		busResp, err := DailBusDetail(lineID)
+		busResp, err := BusDetail(lineID)
 		//
 		if err != nil || busResp.Status.Code != 0 {
 			if err != nil {
